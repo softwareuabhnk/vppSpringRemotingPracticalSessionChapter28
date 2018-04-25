@@ -1,5 +1,7 @@
 package com.virtualpairprogrammers.restcontrollers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.virtualpairprogrammers.domain.Customer;
@@ -37,5 +40,27 @@ public class CustomerRestController {
 		return customerService.getFullCustomerDetail(id);
 	
 	}
-
+	
+	
+	/**
+	 * Requirement: Only return customers.
+	 * @return
+	 */
+	@RequestMapping(value="/customers")
+	public CustomerCollectionRepresentation returnAllCustomers(@RequestParam(required=false) Integer first, 
+															   @RequestParam(required=false) Integer last){
+		
+		List<Customer> allCustomers = customerService.getAllCustomers();
+		for (Customer next: allCustomers) {
+			next.setCalls(null);
+		}
+		
+		if (first !=null & last!=null) {		
+			return new CustomerCollectionRepresentation (allCustomers.subList(first-1, last));
+	 	}
+		else {
+			return new CustomerCollectionRepresentation (allCustomers);
+	 	}
+			
+	}
 }
