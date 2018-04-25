@@ -1,10 +1,13 @@
 package com.virtualpairprogrammers.restcontrollers;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.virtualpairprogrammers.domain.Customer;
@@ -17,23 +20,22 @@ public class CustomerRestController {
 	@Autowired
 	private CustomerManagementService customerService;
 	
+	@ExceptionHandler(CustomerNotFoundException.class)
+	public ResponseEntity<ClientErrorInformation> rulesForCustomerNotFound(HttpServletRequest req, Exception e) {
+		
+		// return a representation of the the error
+		ClientErrorInformation error = new ClientErrorInformation(e.toString(), req.getRequestURI());
+		return new ResponseEntity<ClientErrorInformation>(error, HttpStatus.NOT_FOUND);
+		
+	}
+	
 	//We want to support GETs to /customer/373737
 	//@RequestMapping(value="/customer/{id}", headers = {"Accept=application/xml,application/json"})
 	@RequestMapping(value="/customer/{id}")
-	public Customer findCustomerById(@PathVariable String id) {
+	public Customer findCustomerById(@PathVariable String id) throws CustomerNotFoundException {
 		
-		Customer foundCustomer;
-		try {
-		foundCustomer =customerService.getFullCustomerDetail(id);
-		}
-		catch (CustomerNotFoundException e) {
-			//e.printStackTrace();
-			// TODO - improve this
-			throw new RuntimeException(e);
-		}
-		// Return an object but this will be picked up by a httpmessageconverter
-		//(if a suitable one exists) to fullfil the content type requested by the client
-		return foundCustomer;
+		return customerService.getFullCustomerDetail(id);
+	
 	}
 
 }
