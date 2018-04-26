@@ -1,10 +1,12 @@
 package com.virtualpairprogrammers.restcontrollers;
 
+import java.net.URI;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,8 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.virtualpairprogrammers.domain.Customer;
 import com.virtualpairprogrammers.services.customers.CustomerManagementService;
@@ -68,9 +71,22 @@ public class CustomerRestController {
 	}
 	
 	@RequestMapping(value="/customers", method=RequestMethod.POST)
-	@ResponseStatus(value=HttpStatus.CREATED)
-	public Customer createNewCustomer(@RequestBody Customer newCustomer) {
-		return customerService.newCustomer(newCustomer);
+	public ResponseEntity<Customer> createNewCustomer(@RequestBody Customer newCustomer) {
+			
+		Customer createdCustomer =customerService.newCustomer(newCustomer);
+		
+		HttpHeaders headers = new HttpHeaders();
+		
+//		URI uri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/customer/").path(createdCustomer.getCustomerId()).build().toUri();
+//		headers.setLocation(uri);
+		
+		URI uri = MvcUriComponentsBuilder.fromMethodName(CustomerRestController.class, 
+														"findCustomerById", 
+														createdCustomer.getCustomerId()).build().toUri();
+		headers.setLocation(uri);
+											
+		
+		return new ResponseEntity<Customer>(createdCustomer, headers, HttpStatus.CREATED);
 	}
 	
 	
