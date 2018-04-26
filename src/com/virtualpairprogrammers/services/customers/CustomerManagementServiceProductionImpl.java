@@ -26,9 +26,17 @@ public class CustomerManagementServiceProductionImpl implements
 	}
 	
 	@Override
-	public void newCustomer(Customer newCustomer) 
+	public Customer newCustomer(Customer newCustomer) 
 	{
+		
+		if  (newCustomer.getCustomerId() == null) {
+			// Generate an ID using some kind of business rule
+			String newID = java.util.UUID.randomUUID().toString();
+			newCustomer.setCustomerId(newID);
+			
+		}
 		dao.create(newCustomer);
+		return newCustomer;
 	}
 
 	@Override

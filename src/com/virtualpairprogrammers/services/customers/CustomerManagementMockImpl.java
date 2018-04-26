@@ -22,8 +22,9 @@ public class CustomerManagementMockImpl implements CustomerManagementService
 	}
 	
 	@Override
-	public void newCustomer(Customer newCustomer) {
+	public Customer newCustomer(Customer newCustomer) {
 		customerMap.put(newCustomer.getCustomerId(), newCustomer);
+		return newCustomer;
 	}
 
 	@Override

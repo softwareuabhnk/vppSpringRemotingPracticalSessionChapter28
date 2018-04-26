@@ -18,7 +18,7 @@ public interface CustomerManagementService
 	/**
 	 * Takes a customer domain object and saves it in the database
 	 */
-	public void newCustomer(Customer newCustomer);
+	public Customer newCustomer(Customer newCustomer);
 	
 	/**
 	 * The specified customer is updated in the database.
