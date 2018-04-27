@@ -6,6 +6,9 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.virtualpairprogrammers.domain.Customer;
 import com.virtualpairprogrammers.services.customers.CustomerManagementService;
@@ -51,18 +52,26 @@ public class CustomerRestController {
 	/**
 	 * Requirement: Only return customers.
 	 * @return
+	 * @throws CustomerNotFoundException 
 	 */
 	@RequestMapping(value="/customers", method=RequestMethod.GET)
 	public CustomerCollectionRepresentation returnAllCustomers(@RequestParam(required=false) Integer first, 
-															   @RequestParam(required=false) Integer last){
+															   @RequestParam(required=false) Integer last) throws CustomerNotFoundException{
 		
 		List<Customer> allCustomers = customerService.getAllCustomers();
 		for (Customer next: allCustomers) {
 			next.setCalls(null);
+			
+			
+			Link link = linkTo(methodOn(CustomerRestController.class).findCustomerById(next.getCustomerId())).withSelfRel();
+			next.add(link);
 		}
 		
 		if (first !=null & last!=null) {		
-			return new CustomerCollectionRepresentation (allCustomers.subList(first-1, last));
+			CustomerCollectionRepresentation page = new CustomerCollectionRepresentation (allCustomers.subList(first-1, last));
+			page.add(linkTo(methodOn(CustomerRestController.class).returnAllCustomers(last + 1, last + 10)).withRel("next"));
+			return page;
+			
 	 	}
 		else {
 			return new CustomerCollectionRepresentation (allCustomers);
@@ -71,18 +80,24 @@ public class CustomerRestController {
 	}
 	
 	@RequestMapping(value="/customers", method=RequestMethod.POST)
-	public ResponseEntity<Customer> createNewCustomer(@RequestBody Customer newCustomer) {
+	public ResponseEntity<Customer> createNewCustomer(@RequestBody Customer newCustomer) throws CustomerNotFoundException {
 			
 		Customer createdCustomer =customerService.newCustomer(newCustomer);
 		
 		HttpHeaders headers = new HttpHeaders();
 		
+//      This works just fine		
 //		URI uri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/customer/").path(createdCustomer.getCustomerId()).build().toUri();
 //		headers.setLocation(uri);
 		
-		URI uri = MvcUriComponentsBuilder.fromMethodName(CustomerRestController.class, 
-														"findCustomerById", 
-														createdCustomer.getCustomerId()).build().toUri();
+//      This works also just fine.		
+//		URI uri = MvcUriComponentsBuilder.fromMethodName(CustomerRestController.class, 
+//														"findCustomerById", 
+//														createdCustomer.getCustomerId()).build().toUri();
+		
+//		URI uri = ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(CustomerRestController.class).findCustomerById("109")).toUri();
+		URI uri = linkTo(methodOn(CustomerRestController.class).findCustomerById(createdCustomer.getCustomerId())).toUri();
+		
 		headers.setLocation(uri);
 											
 		

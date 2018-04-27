@@ -5,10 +5,12 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.springframework.hateoas.ResourceSupport;
+
 import com.virtualpairprogrammers.domain.Customer;
 
 @XmlRootElement(name="customers")
-public class CustomerCollectionRepresentation {
+public class CustomerCollectionRepresentation extends ResourceSupport{
 	
 	private List<Customer> customers;
 	
