@@ -12,6 +12,7 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.hateoas.ResourceSupport;
 
 /**
@@ -36,7 +37,8 @@ public class Customer extends ResourceSupport implements Serializable
 	/**
 	 * The company name
 	 */
-	@javax.validation.constraints.NotNull
+	//@javax.validation.constraints.NotNull
+	@NotEmpty
 	private String companyName;
 	
 	/**

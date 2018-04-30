@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.virtualpairprogrammers.domain.Customer;
+import com.virtualpairprogrammers.services.calls.CallHandlingService;
 import com.virtualpairprogrammers.services.customers.CustomerManagementService;
 import com.virtualpairprogrammers.services.customers.CustomerNotFoundException;
 
@@ -34,6 +35,9 @@ public class CustomerRestController {
 	
 	@Autowired
 	private CustomerValidator validator;
+	
+	@Autowired
+	private CallHandlingService callService;
 	
 	@ExceptionHandler(CustomerNotFoundException.class)
 	public ResponseEntity<ClientErrorInformation> rulesForCustomerNotFound(HttpServletRequest req, Exception e) {
@@ -128,7 +132,18 @@ public class CustomerRestController {
 		
 	}
 	
-
+	@RequestMapping(value="/customer/{id}/calls", method=RequestMethod.POST)
+	public void recordBusinessProcess (@RequestBody CallActionRepresentation incommingCall, @PathVariable String id) throws CustomerNotFoundException {
+		
+		callService.recordCall(id, incommingCall.getCall(), incommingCall.getActions());
+	}
+	
+	@RequestMapping(value="/customer/{id}/calls", method=RequestMethod.GET)
+	public CallCollection getAllCallsForCustomers(@PathVariable String id) throws CustomerNotFoundException {
+		Customer customer = customerService.getFullCustomerDetail(id);
+		return new CallCollection(customer.getCalls());
+		
+	}
 	
 	
 }
