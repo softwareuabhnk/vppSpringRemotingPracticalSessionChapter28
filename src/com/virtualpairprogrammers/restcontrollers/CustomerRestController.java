@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
@@ -12,6 +13,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +31,9 @@ public class CustomerRestController {
 	
 	@Autowired
 	private CustomerManagementService customerService;
+	
+	@Autowired
+	private CustomerValidator validator;
 	
 	@ExceptionHandler(CustomerNotFoundException.class)
 	public ResponseEntity<ClientErrorInformation> rulesForCustomerNotFound(HttpServletRequest req, Exception e) {
@@ -80,10 +85,16 @@ public class CustomerRestController {
 	}
 	
 	@RequestMapping(value="/customers", method=RequestMethod.POST)
-	public ResponseEntity<Customer> createNewCustomer(@RequestBody Customer newCustomer) throws CustomerNotFoundException {
+	//public ResponseEntity<Customer> createNewCustomer(@RequestBody Customer newCustomer, Errors errors) throws CustomerNotFoundException {
+	public ResponseEntity<Customer> createNewCustomer(@RequestBody @Valid Customer newCustomer) throws CustomerNotFoundException {
 			
-		Customer createdCustomer =customerService.newCustomer(newCustomer);
+		//Validation
+//		validator.validate(newCustomer, errors);
+//		
+//		if (errors.hasErrors()) return new ResponseEntity<Customer>(HttpStatus.BAD_REQUEST);
 		
+		// 
+		Customer createdCustomer =customerService.newCustomer(newCustomer);
 		HttpHeaders headers = new HttpHeaders();
 		
 //      This works just fine		
@@ -97,10 +108,7 @@ public class CustomerRestController {
 		
 //		URI uri = ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(CustomerRestController.class).findCustomerById("109")).toUri();
 		URI uri = linkTo(methodOn(CustomerRestController.class).findCustomerById(createdCustomer.getCustomerId())).toUri();
-		
 		headers.setLocation(uri);
-											
-		
 		return new ResponseEntity<Customer>(createdCustomer, headers, HttpStatus.CREATED);
 	}
 	

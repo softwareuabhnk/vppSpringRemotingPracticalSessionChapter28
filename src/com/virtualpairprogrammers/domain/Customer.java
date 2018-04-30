@@ -9,6 +9,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.springframework.hateoas.ResourceSupport;
@@ -35,6 +36,7 @@ public class Customer extends ResourceSupport implements Serializable
 	/**
 	 * The company name
 	 */
+	@javax.validation.constraints.NotNull
 	private String companyName;
 	
 	/**
@@ -50,6 +52,7 @@ public class Customer extends ResourceSupport implements Serializable
 	/**
 	 * Any notes associated with this customer
 	 */
+	@NotNull
 	private String notes;
 	
 	/**
